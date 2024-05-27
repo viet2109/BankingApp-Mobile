@@ -5,11 +5,9 @@ import matcha.banking.be.dto.RegisterDto;
 import matcha.banking.be.entity.UserEntity;
 import matcha.banking.be.service.UserService;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -41,7 +39,16 @@ public class UserController {
             return ResponseEntity.badRequest().body(responseBody);
         } catch (DuplicateKeyException de) {
             responseBody.put("error", de.getMessage());
-            return ResponseEntity.status(409).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
         }
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<Object> getUserByEmail(@PathVariable String email) {
+        UserEntity userEntity = userService.getUserByEmail(email);
+        if (userEntity == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(userEntity);
     }
 }

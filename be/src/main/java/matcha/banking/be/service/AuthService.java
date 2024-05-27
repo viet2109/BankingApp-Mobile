@@ -1,18 +1,26 @@
 package matcha.banking.be.service;
 
 import lombok.RequiredArgsConstructor;
+import matcha.banking.be.config.SecurityConfigurer;
 import matcha.banking.be.dao.UserDao;
 import matcha.banking.be.dto.RegisterDto;
 import matcha.banking.be.entity.UserEntity;
+import matcha.banking.be.util.JwtUtil;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class AuthService {
     private final UserDao userDao;
+    private final JwtUtil jwtUtil;
 
     public UserEntity createUser(RegisterDto registerDto) {
 
@@ -38,6 +46,32 @@ public class UserService {
 
     public UserEntity getUserByEmail(String email) {
         return userDao.findByEmail(email).orElse(null);
+    }
+
+    public String login(String email, String password) {
+        if (email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        } else if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
+        UserEntity userEntity = userDao.findByEmail(email).orElseThrow(
+                () -> new EmptyResultDataAccessException("User not found", 1)
+        );
+
+        if (userEntity.getPassword().equals(password)) {
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userEntity, null);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return jwtUtil.generateToken(userEntity);
+        } else {
+            throw new IllegalArgumentException("Invalid password");
+        }
+    }
+
+    public UserEntity getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+        return userDao.findByEmail(userEntity.getEmail()).orElseThrow(() -> new EmptyResultDataAccessException("User not found", 1));
     }
 
     private String inputCheck(RegisterDto registerDto) {
