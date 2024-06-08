@@ -29,6 +29,18 @@ public class UserEntity {
     @Column(name = "email")
     private String email;
 
+    /* Balance of user */
+    @Column(name = "balance")
+    private Double balance;
+
+    /* Card number of user */
+    @Column(name = "card_number")
+    private String cardNumber;
+
+    /* Bank of user */
+    @Column(name = "bank")
+    private String bank;
+
     /* Password of user */
     @Column(name = "hashed_password")
     private String password;

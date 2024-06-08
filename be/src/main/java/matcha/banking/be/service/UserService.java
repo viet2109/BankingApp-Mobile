@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import matcha.banking.be.dao.UserDao;
 import matcha.banking.be.dto.RegisterDto;
 import matcha.banking.be.entity.UserEntity;
+import matcha.banking.be.util.JwtUtil;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
     private final UserDao userDao;
+    private final JwtUtil jwtUtil;
 
     public UserEntity createUser(RegisterDto registerDto) {
 
@@ -38,6 +40,16 @@ public class UserService {
 
     public UserEntity getUserByEmail(String email) {
         return userDao.findByEmail(email).orElse(null);
+    }
+
+    public String getEmailfromToken(String token) {
+        return jwtUtil.getEmailFromJwt(token);
+    }
+
+    public String getCardNumberfromToken(String token) {
+        String email = jwtUtil.getEmailFromJwt(token);
+        UserEntity userEntity = userDao.findByEmail(email).orElse(null);
+        return userEntity.getCardNumber();
     }
 
     private String inputCheck(RegisterDto registerDto) {

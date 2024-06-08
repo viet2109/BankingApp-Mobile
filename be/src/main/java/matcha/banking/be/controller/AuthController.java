@@ -3,6 +3,7 @@ package matcha.banking.be.controller;
 import lombok.RequiredArgsConstructor;
 import matcha.banking.be.dto.GetUserInfoDto;
 import matcha.banking.be.dto.LoginDto;
+import matcha.banking.be.dto.LoginReponseBodyDto;
 import matcha.banking.be.dto.RegisterDto;
 import matcha.banking.be.entity.UserEntity;
 import matcha.banking.be.mapper.UserMapper;
@@ -56,25 +57,8 @@ public class AuthController {
     public ResponseEntity<Object> login(@RequestBody LoginDto loginDto) {
         Map<String, Object> responseBody = new HashMap<>();
         try {
-            String token = authService.login(loginDto.getEmail(), loginDto.getPassword());
-            responseBody.put("token", token);
-            return ResponseEntity.ok(responseBody);
-        } catch (IllegalArgumentException ie) {
-            responseBody.put("error", ie.getMessage());
-            return ResponseEntity.badRequest().body(responseBody);
-        } catch (EmptyResultDataAccessException ee) {
-            responseBody.put("error", ee.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
-        }
-    }
-
-    @GetMapping("/current-user")
-    public ResponseEntity<Object> getCurrentUser() {
-        Map<String, Object> responseBody = new HashMap<>();
-        try {
-            UserEntity userEntity = authService.getCurrentUser();
-            GetUserInfoDto getUserInfoDto = userMapper.entityToDto(userEntity);
-            return ResponseEntity.ok(getUserInfoDto);
+            LoginReponseBodyDto token = authService.login(loginDto.getEmail(), loginDto.getPassword());
+            return ResponseEntity.ok(token);
         } catch (IllegalArgumentException ie) {
             responseBody.put("error", ie.getMessage());
             return ResponseEntity.badRequest().body(responseBody);
