@@ -40,6 +40,9 @@ public class UserService {
         return userDao.save(userEntity);
     }
 
+    public UserEntity getUserByCard(String card) {
+        return userDao.findByCardNumber(card).orElse(null);
+    }
     public UserEntity getUserByEmail(String email) {
         return userDao.findByEmail(email).orElse(null);
     }

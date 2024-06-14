@@ -50,13 +50,14 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<Object> getUserByEmail(@PathVariable String email) {
-        UserEntity userEntity = userService.getUserByEmail(email);
+    @GetMapping("/{card}")
+    public ResponseEntity<Object> getUserByCard(@PathVariable String card) {
+        UserEntity userEntity = userService.getUserByCard(card);
         if (userEntity == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(userEntity);
+
+        return ResponseEntity.ok(userMapper.entityToDto(userEntity));
     }
 
     @PostMapping("/tranfer")
