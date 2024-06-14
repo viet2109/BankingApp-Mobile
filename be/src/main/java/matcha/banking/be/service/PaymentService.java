@@ -34,7 +34,9 @@ public class PaymentService {
         if (category != null) {
             paymentEntities.removeIf(paymentEntity -> !paymentEntity.getCategory().equals(category));
         }
-        return paymentEntities;
+        return paymentEntities.stream().sorted(
+                (t1, t2) -> t2.getCreated().compareTo(t1.getCreated())
+        ).toList();
     }
 
     public void payBill(BillEntity billEntity, String token) {

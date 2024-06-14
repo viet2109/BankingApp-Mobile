@@ -9,12 +9,14 @@ import matcha.banking.be.entity.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransitionService {
     private final TransitionDao transitionDao;
     private final UserDao userDao;
+    private final UserService userService;
 
     public void performTransfer(TransitionDto transitionDto) {
         UserEntity sender = userDao.findByCardNumber(transitionDto.getSender()).orElseThrow(
@@ -50,5 +52,12 @@ public class TransitionService {
         transitionEntity.setCreated(LocalDateTime.now());
 
         transitionDao.save(transitionEntity);
+    }
+
+    public List<TransitionEntity> getMyTransition(String token) {
+        String myCardNumber = userService.getCardNumberfromToken(token);
+        return transitionDao.findByFromUser(myCardNumber).stream().sorted(
+                (t1, t2) -> t2.getCreated().compareTo(t1.getCreated())
+        ).toList();
     }
 }
