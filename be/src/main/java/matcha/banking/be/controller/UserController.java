@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import matcha.banking.be.dto.GetUserInfoDto;
 import matcha.banking.be.dto.RegisterDto;
 import matcha.banking.be.dto.TransitionDto;
+import matcha.banking.be.entity.EmailDetails;
 import matcha.banking.be.entity.UserEntity;
 import matcha.banking.be.mapper.UserMapper;
+import matcha.banking.be.service.EmailService;
 import matcha.banking.be.service.TransitionService;
 import matcha.banking.be.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -26,6 +29,7 @@ public class UserController {
     private final UserService userService;
     private final TransitionService transitionService;
     private final UserMapper userMapper;
+
 
     @PostMapping
     public ResponseEntity<Object> createUser(@RequestBody RegisterDto registerDto) {
@@ -49,6 +53,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
         }
     }
+
+
 
     @GetMapping("/{card}")
     public ResponseEntity<Object> getUserByCard(@PathVariable String card) {
