@@ -3,19 +3,19 @@ package matcha.banking.be.controller;
 import lombok.RequiredArgsConstructor;
 import matcha.banking.be.dto.GetUserInfoDto;
 import matcha.banking.be.dto.LoginDto;
+import matcha.banking.be.dto.LoginReponseBodyDto;
 import matcha.banking.be.dto.RegisterDto;
+import matcha.banking.be.entity.EmailDetails;
 import matcha.banking.be.entity.UserEntity;
 import matcha.banking.be.mapper.UserMapper;
 import matcha.banking.be.service.AuthService;
+import matcha.banking.be.service.EmailService;
+import matcha.banking.be.service.UserService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -26,10 +26,34 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
+
     private final AuthService authService;
     private final UserMapper userMapper;
+    private final UserService userService;
+    private final EmailService emailService;
 
-    @PostMapping("register")
+    @GetMapping("/forgot-pass/{email}")
+    public ResponseEntity<Object> sendPassToMail(@PathVariable String email) {
+        UserEntity userEntity = userService.getUserByEmail(email);
+        Map<String, String> responseBody = new HashMap<>();
+
+
+        if (userEntity == null) {
+            responseBody.put("error", "User not found");
+
+            return ResponseEntity.notFound().build();
+        }
+
+        EmailDetails emailDetails = EmailDetails.builder().recipient(email).msgBody("Your password is: " + userEntity.getPassword()).subject("Matcha Bank").build();
+
+        emailService.sendSimpleMail(emailDetails);
+        responseBody.put("status", "Successfull!!!");
+
+
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<Object> createUser(@RequestBody RegisterDto registerDto) {
         Map<String, Object> responseBody = new HashMap<>();
         try {
@@ -56,25 +80,8 @@ public class AuthController {
     public ResponseEntity<Object> login(@RequestBody LoginDto loginDto) {
         Map<String, Object> responseBody = new HashMap<>();
         try {
-            String token = authService.login(loginDto.getEmail(), loginDto.getPassword());
-            responseBody.put("token", token);
-            return ResponseEntity.ok(responseBody);
-        } catch (IllegalArgumentException ie) {
-            responseBody.put("error", ie.getMessage());
-            return ResponseEntity.badRequest().body(responseBody);
-        } catch (EmptyResultDataAccessException ee) {
-            responseBody.put("error", ee.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
-        }
-    }
-
-    @GetMapping("/current-user")
-    public ResponseEntity<Object> getCurrentUser() {
-        Map<String, Object> responseBody = new HashMap<>();
-        try {
-            UserEntity userEntity = authService.getCurrentUser();
-            GetUserInfoDto getUserInfoDto = userMapper.entityToDto(userEntity);
-            return ResponseEntity.ok(getUserInfoDto);
+            LoginReponseBodyDto token = authService.login(loginDto.getEmail(), loginDto.getPassword());
+            return ResponseEntity.ok(token);
         } catch (IllegalArgumentException ie) {
             responseBody.put("error", ie.getMessage());
             return ResponseEntity.badRequest().body(responseBody);

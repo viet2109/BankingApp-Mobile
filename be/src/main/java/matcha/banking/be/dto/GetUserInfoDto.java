@@ -1,5 +1,6 @@
 package matcha.banking.be.dto;
 
+import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.io.Serial;
@@ -17,6 +18,15 @@ public class GetUserInfoDto implements Serializable {
 
     /** Email of user */
     private String email;
+
+    /* Balance of user */
+    private Double balance;
+
+    /* Card number of user */
+    private String cardNumber;
+
+    /* Bank of user */
+    private String bank;
 
     /** Created at */
     private LocalDateTime created;

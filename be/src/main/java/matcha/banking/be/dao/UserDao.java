@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface UserDao extends CrudRepository<UserEntity, Integer> {
     Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByCardNumber(String cardNumber);
 }

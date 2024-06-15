@@ -3,8 +3,11 @@ package matcha.banking.be.service;
 import lombok.RequiredArgsConstructor;
 import matcha.banking.be.dao.UserDao;
 import matcha.banking.be.dto.RegisterDto;
+import matcha.banking.be.entity.BillEntity;
 import matcha.banking.be.entity.UserEntity;
+import matcha.banking.be.util.JwtUtil;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
     private final UserDao userDao;
+    private final JwtUtil jwtUtil;
 
     public UserEntity createUser(RegisterDto registerDto) {
 
@@ -36,8 +40,31 @@ public class UserService {
         return userDao.save(userEntity);
     }
 
+    public UserEntity getUserByCard(String card) {
+        return userDao.findByCardNumber(card).orElse(null);
+    }
     public UserEntity getUserByEmail(String email) {
         return userDao.findByEmail(email).orElse(null);
+    }
+
+    public String getEmailfromToken(String token) {
+        return jwtUtil.getEmailFromJwt(token);
+    }
+
+    public String getCardNumberfromToken(String token) {
+        String email = jwtUtil.getEmailFromJwt(token);
+        UserEntity userEntity = userDao.findByEmail(email).orElse(null);
+        return userEntity.getCardNumber();
+    }
+
+    public void payBill(Double amount, String token) {
+        String email = jwtUtil.getEmailFromJwt(token);
+        UserEntity userEntity = userDao.findByEmail(email).orElse(null);
+        if (userEntity.getBalance() < amount) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+        userEntity.setBalance(userEntity.getBalance() - amount);
+        userDao.save(userEntity);
     }
 
     private String inputCheck(RegisterDto registerDto) {
