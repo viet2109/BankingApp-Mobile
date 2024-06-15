@@ -43,7 +43,7 @@ public class PaymentService {
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setForUser(userService.getCardNumberfromToken(token));
         paymentEntity.setCategory(billEntity.getCategory());
-        paymentEntity.setAmount(billEntity.getAmount());
+        paymentEntity.setAmount(billEntity.getAmount() - (billEntity.getFee() + billEntity.getTax()));
         paymentEntity.setCreated(LocalDateTime.now());
         paymentEntity.setStatus("Successfully");
         paymentDao.save(paymentEntity);

@@ -24,7 +24,7 @@ public class BillService {
 
     public void payBill(String code, String token) {
         BillEntity billEntity = billDao.findByCode(code).orElseThrow(() -> new EmptyResultDataAccessException("Bill not found", 1));
-        userService.payBill(billEntity.getAmount(), token);
+        userService.payBill(billEntity.getAmount() -( billEntity.getFee() + billEntity.getTax()), token);
         paymentService.payBill(billEntity, token);
         billDao.delete(billEntity);
     }
