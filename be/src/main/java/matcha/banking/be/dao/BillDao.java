@@ -11,4 +11,6 @@ public interface BillDao extends CrudRepository<BillEntity, String> {
     List<BillEntity> findAll();
 
     Optional<BillEntity> findByCode(String code);
+
+    Optional<BillEntity> findByCodeAndCategory(String code, String category);
 }
